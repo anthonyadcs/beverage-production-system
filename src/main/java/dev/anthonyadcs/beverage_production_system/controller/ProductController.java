@@ -1,6 +1,7 @@
 package dev.anthonyadcs.beverage_production_system.controller;
 
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.UpdateProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
 import dev.anthonyadcs.beverage_production_system.service.ProductService;
@@ -25,8 +26,13 @@ public class ProductController {
     private ProductService productService;
 
     @PostMapping
-    public ResponseEntity<ProductResponse> create(@RequestBody @Valid CreateProductRequest body) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(body));
+    public ResponseEntity<ProductResponse> create(@RequestBody @Valid CreateProductRequest requestBody) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(requestBody));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ProductResponse> update(@PathVariable String id, @RequestBody @Valid UpdateProductRequest requestBody) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(productService.update(UUID.fromString(id), requestBody));
     }
 
     @GetMapping("/{id}")
