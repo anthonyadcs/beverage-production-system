@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -64,6 +65,46 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase().toUpperCase(),
                 exception.getMessage(),
+                Instant.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.status(errorResponse.statusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFoundException(
+            EntityNotFoundException exception,
+            HttpServletRequest request
+    ) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase().toUpperCase(),
+                exception.getMessage(),
+                Instant.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.status(errorResponse.statusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            IllegalArgumentException exception,
+            HttpServletRequest request
+    ) {
+        String message = null;
+
+        if(exception.getMessage().contains("UUID")){
+            message = "Código de identificação fora do padrão esperado.";
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase().toUpperCase(),
+                Optional.ofNullable(message).orElse("Um ou mais parâmetros informados são inválidos ou estão em um formato incorreto."),
                 Instant.now(),
                 request.getRequestURI(),
                 null
