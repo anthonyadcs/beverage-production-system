@@ -1,6 +1,6 @@
 package dev.anthonyadcs.beverage_production_system.domain.enums;
 
-public enum ProductMeasurementUnit {
+public enum ProductUnitOfMeasure {
     LITER,
     MILILITER,
     UNIT
