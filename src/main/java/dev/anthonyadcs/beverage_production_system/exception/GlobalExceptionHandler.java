@@ -112,4 +112,38 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(errorResponse.statusCode()).body(errorResponse);
     }
+
+    @ExceptionHandler(InvalidEntityStateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidEntityStateException(
+            InvalidEntityStateException exception,
+            HttpServletRequest request
+    ) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNPROCESSABLE_CONTENT.value(),
+                HttpStatus.UNPROCESSABLE_CONTENT.getReasonPhrase().toUpperCase(),
+                exception.getMessage(),
+                Instant.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.status(errorResponse.statusCode()).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidArgumentException(
+            InvalidArgumentException exception,
+            HttpServletRequest request
+    ) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNPROCESSABLE_CONTENT.value(),
+                HttpStatus.UNPROCESSABLE_CONTENT.getReasonPhrase().toUpperCase(),
+                exception.getMessage(),
+                Instant.now(),
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.status(errorResponse.statusCode()).body(errorResponse);
+    }
 }
