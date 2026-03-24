@@ -3,10 +3,17 @@ package dev.anthonyadcs.beverage_production_system.service;
 import dev.anthonyadcs.beverage_production_system.domain.entity.Product;
 import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
+import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
 import dev.anthonyadcs.beverage_production_system.repository.ProductRepository;
+import dev.anthonyadcs.beverage_production_system.specification.ProductSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ProductService {
@@ -25,5 +32,23 @@ public class ProductService {
         return ProductResponse.fromEntity(
                 productRepository.save(product)
         );
+    }
+
+    public PageResponse<ProductResponse> getAll(List<Boolean> activeValues, String name, String code, Pageable pageable){
+        Specification<Product> specification = Specification.where(ProductSpecification.isActiveIn(activeValues) );
+
+        if(name != null && !name.isBlank()){
+            specification = specification.and(ProductSpecification.hasNameIgnoreCase(name));
+        }
+
+        if(code != null && !code.isBlank()){
+            specification = specification.and(ProductSpecification.hasCode(code));
+        }
+
+        //Busca por todos os critérios e, com o map, transforma Product em ProductResponse
+        Page<ProductResponse> productResponsePage = productRepository.findAll(specification, pageable).map(ProductResponse::fromEntity);
+
+        //Transforma Page em PageResponse para melhor filtro dos campos retornados na requisição
+        return PageResponse.fromPage(productResponsePage);
     }
 }
