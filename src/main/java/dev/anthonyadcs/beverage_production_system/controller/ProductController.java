@@ -1,16 +1,21 @@
 package dev.anthonyadcs.beverage_production_system.controller;
 
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
+import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
 import dev.anthonyadcs.beverage_production_system.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("products")
@@ -19,7 +24,33 @@ public class ProductController {
     private ProductService productService;
 
     @PostMapping
-    public ResponseEntity<ProductResponse> create(@RequestBody @Valid CreateProductRequest body){
+    public ResponseEntity<ProductResponse> create(@RequestBody @Valid CreateProductRequest body) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(body));
     }
+
+    @GetMapping
+    public PageResponse<ProductResponse> listAll(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false, defaultValue = "true") List<Boolean> active,
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer size,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        //Em caso de ordenação não definida, atualiza 'pageable' para um sort por: 'active', 'name' e 'code', respectivamente.
+        if(pageable.getSort().isUnsorted()){
+            pageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(
+                            Sort.Order.desc("active"),
+                            Sort.Order.asc("name"),
+                            Sort.Order.asc("code")
+                    )
+            );
+        }
+
+        return productService.getAll(active, name, code, pageable);
+    }
+
 }
