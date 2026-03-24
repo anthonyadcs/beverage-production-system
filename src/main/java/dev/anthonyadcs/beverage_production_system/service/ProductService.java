@@ -8,6 +8,7 @@ import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
 import dev.anthonyadcs.beverage_production_system.exception.ProductNotFoundException;
 import dev.anthonyadcs.beverage_production_system.repository.ProductRepository;
 import dev.anthonyadcs.beverage_production_system.specification.ProductSpecification;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Transactional
     public ProductResponse create(CreateProductRequest productRequest){
         EntityCode code;
         do{
@@ -30,6 +32,8 @@ public class ProductService {
         } while(productRepository.existsByCode(code));
 
         Product product = new Product(code, productRequest);
+
+        productRepository.save(product);
 
         return ProductResponse.fromEntity(
                 productRepository.save(product)
