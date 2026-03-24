@@ -3,6 +3,8 @@ package dev.anthonyadcs.beverage_production_system.domain.entity;
 import dev.anthonyadcs.beverage_production_system.domain.enums.ProductUnitOfMeasure;
 import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.UpdateProductRequest;
+import dev.anthonyadcs.beverage_production_system.exception.InvalidArgumentException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
@@ -70,4 +72,29 @@ public class Product {
     public String getCode() {
         return code.getCode();
     }
+
+    public void update(UpdateProductRequest productRequest){
+        if(productRequest.isEmpty()){
+            throw new InvalidArgumentException(
+                    "Ao menos um dos campos devem ser fornecidos para atualização: 'nome', 'descrição', 'unidade de medida', 'volume por unidade'"
+            );
+        }
+
+        if(productRequest.name() != null && !productRequest.name().isBlank()){
+            this.name = productRequest.name();
+        }
+
+        if(productRequest.description() != null && !productRequest.description().isBlank()){
+            this.description = productRequest.description();
+        }
+
+        if(productRequest.unitOfMeasure() != null){
+            this.unitOfMeasure = productRequest.unitOfMeasure();
+        }
+
+        if(productRequest.volumePerUnit() != null){
+            this.volumePerUnit = productRequest.volumePerUnit();
+        }
+    }
+
 }
