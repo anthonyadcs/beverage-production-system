@@ -1,4 +1,4 @@
-package dev.anthonyadcs.beverage_production_system._application;
+package dev.anthonyadcs.beverage_production_system;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
