@@ -3,8 +3,11 @@ package dev.anthonyadcs.beverage_production_system.service;
 import dev.anthonyadcs.beverage_production_system.domain.entity.Product;
 import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.UpdateProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
+import dev.anthonyadcs.beverage_production_system.exception.InvalidEntityCodeException;
+import dev.anthonyadcs.beverage_production_system.exception.InvalidEntityStateException;
 import dev.anthonyadcs.beverage_production_system.exception.ProductNotFoundException;
 import dev.anthonyadcs.beverage_production_system.repository.ProductRepository;
 import dev.anthonyadcs.beverage_production_system.specification.ProductSpecification;
@@ -33,11 +36,24 @@ public class ProductService {
 
         Product product = new Product(code, productRequest);
 
-        productRepository.save(product);
-
         return ProductResponse.fromEntity(
                 productRepository.save(product)
         );
+    }
+
+    @Transactional
+    public ProductResponse update(UUID id, UpdateProductRequest productRequest){
+        Product product = productRepository.findById(id).orElseThrow(
+                () -> new ProductNotFoundException("Produto", "id", String.valueOf(id))
+        );
+
+        if(!product.isActive()){
+            throw new InvalidEntityStateException("O produto está inativo e não pode ser atualizado.");
+        }
+
+        product.update(productRequest);
+
+        return ProductResponse.fromEntity(product);
     }
 
     public ProductResponse getById(UUID id){
