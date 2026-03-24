@@ -5,8 +5,10 @@ import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.request.UpdateProductRequest;
 import dev.anthonyadcs.beverage_production_system.exception.InvalidArgumentException;
+import dev.anthonyadcs.beverage_production_system.exception.InvalidEntityStateException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -30,8 +32,7 @@ public class Product {
     private String name;
 
     @Embedded
-    @AttributeOverride(name = "code", column = @Column(length = 50, nullable = false, unique = true, updatable = false)
-    )
+    @AttributeOverride(name = "code", column = @Column(length = 50, nullable = false, unique = true, updatable = false))
     private EntityCode code;
 
     @Setter
@@ -47,7 +48,7 @@ public class Product {
     @Column(precision = 10, scale = 3)
     private BigDecimal volumePerUnit;
 
-    @Setter
+    @Setter(AccessLevel.NONE)
     @Column(nullable = false)
     private boolean active = true;
 
@@ -73,12 +74,28 @@ public class Product {
         return code.getCode();
     }
 
+    public void deactivate(){
+        //TODO: IMPLEMENTAR REGRA QUANDO TIVER LISTA DE PRODUÇÕES VINCULADAS AO PRODUTO
+
+        this.active = false;
+    }
+
+    public void activate(){
+        this.active = true;
+    }
+
     public void update(UpdateProductRequest productRequest){
         if(productRequest.isEmpty()){
             throw new InvalidArgumentException(
                     "Ao menos um dos campos devem ser fornecidos para atualização: 'nome', 'descrição', 'unidade de medida', 'volume por unidade'"
             );
         }
+
+        if(!this.isActive()){
+            throw new InvalidEntityStateException("O produto está inativo e não pode ser atualizado.");
+        }
+
+        //TODO: IMPLEMENTAR REGRA QUANDO TIVER LISTA DE PRODUÇÕES VINCULADAS AO PRODUTO
 
         if(productRequest.name() != null && !productRequest.name().isBlank()){
             this.name = productRequest.name();

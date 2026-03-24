@@ -6,8 +6,6 @@ import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductReque
 import dev.anthonyadcs.beverage_production_system.dto.request.UpdateProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
-import dev.anthonyadcs.beverage_production_system.exception.InvalidEntityCodeException;
-import dev.anthonyadcs.beverage_production_system.exception.InvalidEntityStateException;
 import dev.anthonyadcs.beverage_production_system.exception.ProductNotFoundException;
 import dev.anthonyadcs.beverage_production_system.repository.ProductRepository;
 import dev.anthonyadcs.beverage_production_system.specification.ProductSpecification;
@@ -46,10 +44,6 @@ public class ProductService {
         Product product = productRepository.findById(id).orElseThrow(
                 () -> new ProductNotFoundException("Produto", "id", String.valueOf(id))
         );
-
-        if(!product.isActive()){
-            throw new InvalidEntityStateException("O produto está inativo e não pode ser atualizado.");
-        }
 
         product.update(productRequest);
 
