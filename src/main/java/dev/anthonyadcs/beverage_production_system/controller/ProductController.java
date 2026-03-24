@@ -1,4 +1,4 @@
-package dev.anthonyadcs.beverage_production_system.domain.controller;
+package dev.anthonyadcs.beverage_production_system.controller;
 
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
