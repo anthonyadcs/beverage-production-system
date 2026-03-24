@@ -1,7 +1,8 @@
-package dev.anthonyadcs.beverage_production_system.dto;
+package dev.anthonyadcs.beverage_production_system.dto.response;
 
 import dev.anthonyadcs.beverage_production_system.domain.entity.Product;
 import dev.anthonyadcs.beverage_production_system.domain.enums.ProductUnitOfMeasure;
+import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 
 import java.math.BigDecimal;
 import java.time.Instant;
