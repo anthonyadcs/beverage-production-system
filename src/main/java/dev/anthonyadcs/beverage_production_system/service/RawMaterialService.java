@@ -6,6 +6,7 @@ import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateRawMaterialRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.RawMaterialResponse;
+import dev.anthonyadcs.beverage_production_system.exception.RawMaterialNotFoundException;
 import dev.anthonyadcs.beverage_production_system.repository.RawMaterialRepository;
 import dev.anthonyadcs.beverage_production_system.specification.RawMaterialSpecification;
 import jakarta.transaction.Transactional;
@@ -16,6 +17,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class RawMaterialService {
@@ -33,6 +35,14 @@ public class RawMaterialService {
 
         return RawMaterialResponse.fromEntity(
                 rawMaterialRepository.save(rawMaterial)
+        );
+    }
+
+    public RawMaterialResponse getById(UUID id){
+        RawMaterial rawMaterial = findRawRawMaterialById(id);
+
+        return RawMaterialResponse.fromEntity(
+                rawMaterial
         );
     }
 
@@ -60,5 +70,12 @@ public class RawMaterialService {
         Page<RawMaterialResponse> rawMaterialPage = rawMaterialRepository.findAll(specification, pageable).map(RawMaterialResponse::fromEntity);
 
         return PageResponse.fromPage(rawMaterialPage);
+    }
+
+    //Utilitário utilizado para evitar repetição de código.
+    private RawMaterial findRawRawMaterialById(UUID id){
+        return rawMaterialRepository.findById(id).orElseThrow(
+                () -> new RawMaterialNotFoundException("Insumo", "id", String.valueOf(id))
+        );
     }
 }
