@@ -2,6 +2,7 @@ package dev.anthonyadcs.beverage_production_system.controller;
 
 import dev.anthonyadcs.beverage_production_system.domain.enums.RawMaterialUnitOfMeasure;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateRawMaterialRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.UpdateRawMaterialRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.RawMaterialResponse;
 import dev.anthonyadcs.beverage_production_system.service.RawMaterialService;
@@ -26,7 +27,12 @@ public class RawMaterialController {
 
     @PostMapping
     public ResponseEntity<RawMaterialResponse> create(@RequestBody @Valid CreateRawMaterialRequest requestBody) {
-        return ResponseEntity.status(HttpStatus.OK).body(rawMaterialService.create(requestBody));
+        return ResponseEntity.status(HttpStatus.CREATED).body(rawMaterialService.create(requestBody));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<RawMaterialResponse> update(@PathVariable String id, @RequestBody @Valid UpdateRawMaterialRequest requestBody) {
+        return ResponseEntity.status(HttpStatus.OK).body(rawMaterialService.update(UUID.fromString(id), requestBody));
     }
 
     @GetMapping("/{id}")
@@ -50,7 +56,7 @@ public class RawMaterialController {
                             Sort.Order.desc("active"),
                             Sort.Order.asc("name"),
                             Sort.Order.asc("actualStock"),
-                            Sort.Order.desc("minimalStock")
+                            Sort.Order.desc("minimumStock")
                     )
             );
         }
