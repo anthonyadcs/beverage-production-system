@@ -50,6 +50,21 @@ public class RawMaterialService {
         );
     }
 
+    @Transactional
+    public RawMaterialResponse updateStatus(UUID id, String action) {
+        RawMaterial rawMaterial = findRawRawMaterialById(id);
+
+        switch (action.toLowerCase()) {
+            case "activate" -> rawMaterial.activate();
+            case "deactivate" -> rawMaterial.deactivate();
+            default -> {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        return RawMaterialResponse.fromEntity(rawMaterial);
+    }
+
     public RawMaterialResponse getById(UUID id){
         RawMaterial rawMaterial = findRawRawMaterialById(id);
 
