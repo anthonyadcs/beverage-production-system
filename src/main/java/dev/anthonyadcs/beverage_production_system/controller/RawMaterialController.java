@@ -35,6 +35,11 @@ public class RawMaterialController {
         return ResponseEntity.status(HttpStatus.OK).body(rawMaterialService.update(UUID.fromString(id), requestBody));
     }
 
+    @PatchMapping("/{id}/{action}")
+    public ResponseEntity<RawMaterialResponse> updateStatus(@PathVariable String id, @PathVariable String action) {
+        return ResponseEntity.status(HttpStatus.OK).body(rawMaterialService.updateStatus(UUID.fromString(id), action));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<RawMaterialResponse> listById(@PathVariable String id){
         return ResponseEntity.status(HttpStatus.OK).body(rawMaterialService.getById(UUID.fromString(id)));
