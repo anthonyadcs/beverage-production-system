@@ -1,6 +1,7 @@
 package dev.anthonyadcs.beverage_production_system.domain.entity;
 
 import dev.anthonyadcs.beverage_production_system.domain.enums.RawMaterialUnitOfMeasure;
+import dev.anthonyadcs.beverage_production_system.domain.enums.StockMovementType;
 import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateRawMaterialRequest;
 import dev.anthonyadcs.beverage_production_system.dto.request.UpdateRawMaterialRequest;
@@ -9,11 +10,14 @@ import dev.anthonyadcs.beverage_production_system.exception.InvalidEntityStateEx
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -57,6 +61,9 @@ public class RawMaterial {
     @UpdateTimestamp
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant updatedAt;
+
+    @OneToMany(mappedBy = "rawMaterial", fetch = FetchType.LAZY)
+    private Set<StockMovement> stockMovements = new HashSet<>();
 
     protected RawMaterial() {}
 
@@ -115,5 +122,25 @@ public class RawMaterial {
         if(rawMaterialRequest.minimumStock() != null){
             this.minimumStock = rawMaterialRequest.minimumStock();
         }
+    }
+
+    public BigDecimal calculateStockAfterMovement(StockMovementType movementType, BigDecimal movedQuantity , BigDecimal previousStock){
+        return switch (movementType) {
+            case INBOUND -> previousStock.add(movedQuantity);
+            case OUTBOUND -> {
+                BigDecimal calc = previousStock.subtract(movedQuantity);
+
+                if(calc.compareTo(BigDecimal.ZERO) < 0){
+                    throw new InvalidArgumentException("A quantidade de insumo movimentada é superior a quantidade presente em estoque.");
+                }
+
+                yield calc;
+            }
+            case ADJUSTMENT -> movedQuantity;
+        };
+    }
+
+    public void applyStockMovement(BigDecimal resultingStock){
+        this.actualStock = resultingStock;
     }
 }
