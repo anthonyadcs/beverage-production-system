@@ -1,6 +1,5 @@
 package dev.anthonyadcs.beverage_production_system.dto.request;
 
-import dev.anthonyadcs.beverage_production_system.domain.enums.MaterialUnitOfMeasure;
 import dev.anthonyadcs.beverage_production_system.domain.enums.RawMaterialUnitOfMeasure;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;

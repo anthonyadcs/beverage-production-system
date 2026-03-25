@@ -5,6 +5,7 @@ import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateRawMaterialRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.RawMaterialResponse;
 import dev.anthonyadcs.beverage_production_system.repository.RawMaterialRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +14,11 @@ public class RawMaterialService {
     @Autowired
     private RawMaterialRepository rawMaterialRepository;
 
+    @Transactional
     public RawMaterialResponse create(CreateRawMaterialRequest rawMaterialRequest){
         EntityCode code;
         do{
-            code = EntityCode.create("PROD");
+            code = EntityCode.create("RAW");
         } while(rawMaterialRepository.existsByCode(code));
 
         RawMaterial rawMaterial = new RawMaterial(code, rawMaterialRequest);
