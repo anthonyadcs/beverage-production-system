@@ -21,6 +21,6 @@ public record CreateRawMaterialRequest(
 
         @NotNull(message = "O estoque mínimo do insumo é necessário para sua criação.")
         @DecimalMin(value = "0.000", inclusive = false, message = "O estoque mínimo do produto deve ser maior que 0.")
-        BigDecimal minimalStock
+        BigDecimal minimumStock
 ) {
 }

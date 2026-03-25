@@ -75,7 +75,7 @@ public class RawMaterial {
     public void update(UpdateRawMaterialRequest rawMaterialRequest){
         if(rawMaterialRequest.isEmpty()){
             throw new InvalidArgumentException(
-                    "Ao menos um dos campos devem ser fornecidos para atualização: 'nome', 'descrição', 'unidade de medida', 'volume por unidade'"
+                    "Ao menos um dos campos devem ser fornecidos para atualização: 'nome', 'descrição', 'estoque mínimo'."
             );
         }
 

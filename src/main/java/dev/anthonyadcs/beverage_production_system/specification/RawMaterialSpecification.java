@@ -35,7 +35,7 @@ public class RawMaterialSpecification {
     public static Specification<RawMaterial> hasLowStock() {
         return (root, query, criteriaBuilder) -> criteriaBuilder.lessThan(
                 root.get("actualStock"),
-                root.get("minimalStock")
+                root.get("minimumStock")
         );
     }
 }
