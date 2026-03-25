@@ -4,6 +4,7 @@ import dev.anthonyadcs.beverage_production_system.domain.entity.RawMaterial;
 import dev.anthonyadcs.beverage_production_system.domain.enums.RawMaterialUnitOfMeasure;
 import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateRawMaterialRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.UpdateRawMaterialRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.RawMaterialResponse;
 import dev.anthonyadcs.beverage_production_system.exception.RawMaterialNotFoundException;
@@ -35,6 +36,17 @@ public class RawMaterialService {
 
         return RawMaterialResponse.fromEntity(
                 rawMaterialRepository.save(rawMaterial)
+        );
+    }
+
+    @Transactional
+    public RawMaterialResponse update(UUID id, UpdateRawMaterialRequest rawMaterialRequest){
+        RawMaterial rawMaterial = findRawRawMaterialById(id);
+
+        rawMaterial.update(rawMaterialRequest);
+
+        return RawMaterialResponse.fromEntity(
+                rawMaterial
         );
     }
 
