@@ -15,8 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/raw-materials")
@@ -27,6 +27,11 @@ public class RawMaterialController {
     @PostMapping
     public ResponseEntity<RawMaterialResponse> create(@RequestBody @Valid CreateRawMaterialRequest requestBody) {
         return ResponseEntity.status(HttpStatus.OK).body(rawMaterialService.create(requestBody));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<RawMaterialResponse> listById(@PathVariable String id){
+        return ResponseEntity.status(HttpStatus.OK).body(rawMaterialService.getById(UUID.fromString(id)));
     }
 
     @GetMapping
