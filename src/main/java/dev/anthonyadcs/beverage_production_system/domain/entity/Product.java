@@ -77,10 +77,18 @@ public class Product {
     public void deactivate(){
         //TODO: IMPLEMENTAR REGRA QUANDO TIVER LISTA DE PRODUÇÕES VINCULADAS AO PRODUTO
 
+        if(!this.active){
+            throw new InvalidEntityStateException("O produto já está inativo.");
+        }
+
         this.active = false;
     }
 
     public void activate(){
+        if(this.active){
+            throw new InvalidEntityStateException("O produto já está ativo.");
+        }
+
         this.active = true;
     }
 
