@@ -7,7 +7,6 @@ import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
 import dev.anthonyadcs.beverage_production_system.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,6 +32,11 @@ public class ProductController {
     @PatchMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable String id, @RequestBody @Valid UpdateProductRequest requestBody) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(productService.update(UUID.fromString(id), requestBody));
+    }
+
+    @PatchMapping("/{id}/{action}")
+    public ResponseEntity<ProductResponse> updateStatus(@PathVariable String id, @PathVariable String action) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(productService.updateStatus(UUID.fromString(id), action));
     }
 
     @GetMapping("/{id}")
