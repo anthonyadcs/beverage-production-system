@@ -100,7 +100,7 @@ public class RawMaterialService {
     }
 
     //Utilitário utilizado para evitar repetição de código.
-    private RawMaterial findRawRawMaterialById(UUID id){
+    protected RawMaterial findRawRawMaterialById(UUID id){
         return rawMaterialRepository.findById(id).orElseThrow(
                 () -> new RawMaterialNotFoundException("Insumo", "id", String.valueOf(id))
         );
