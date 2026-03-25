@@ -41,9 +41,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponse updateStatus(UUID id, String action) {
-        Product product = productRepository.findById(id).orElseThrow(
-                () -> new ProductNotFoundException("Produto", "id", String.valueOf(id))
-        );
+        Product product = findRawProductById(id);
 
         switch (action) {
             case "activate" -> product.activate();
@@ -58,9 +56,7 @@ public class ProductService {
 
     @Transactional
     public ProductResponse update(UUID id, UpdateProductRequest productRequest){
-        Product product = productRepository.findById(id).orElseThrow(
-                () -> new ProductNotFoundException("Produto", "id", String.valueOf(id))
-        );
+        Product product = findRawProductById(id);
 
         product.update(productRequest);
 
@@ -68,11 +64,7 @@ public class ProductService {
     }
 
     public ProductResponse getById(UUID id){
-        Product product = productRepository.findById(id).orElseThrow(
-                () -> new ProductNotFoundException("Produto", "id", String.valueOf(id))
-        );
-
-        return ProductResponse.fromEntity(product);
+        return ProductResponse.fromEntity(findRawProductById(id));
     }
 
     public PageResponse<ProductResponse> getAll(List<Boolean> activeValues, String name, String code, Pageable pageable){
@@ -91,5 +83,12 @@ public class ProductService {
 
         //Transforma Page em PageResponse para melhor filtro dos campos retornados na requisição
         return PageResponse.fromPage(productResponsePage);
+    }
+
+    //Utilitário utilizado para evitar repetição de código.
+    private Product findRawProductById(UUID id){
+        return productRepository.findById(id).orElseThrow(
+                () -> new ProductNotFoundException("Produto", "id", String.valueOf(id))
+        );
     }
 }
