@@ -52,7 +52,7 @@ public class RawMaterial {
     private Instant createdAt = Instant.now();
 
     @UpdateTimestamp
-    @Column(nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant updatedAt;
 
     protected RawMaterial() {}
