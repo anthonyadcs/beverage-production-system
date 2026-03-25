@@ -2,10 +2,13 @@ package dev.anthonyadcs.beverage_production_system.controller;
 
 import dev.anthonyadcs.beverage_production_system.domain.enums.RawMaterialUnitOfMeasure;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateRawMaterialRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.CreateStockMovementRequest;
 import dev.anthonyadcs.beverage_production_system.dto.request.UpdateRawMaterialRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.RawMaterialResponse;
+import dev.anthonyadcs.beverage_production_system.dto.response.StockMovementResponse;
 import dev.anthonyadcs.beverage_production_system.service.RawMaterialService;
+import dev.anthonyadcs.beverage_production_system.service.StockMovementService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -25,9 +28,17 @@ public class RawMaterialController {
     @Autowired
     private RawMaterialService rawMaterialService;
 
+    @Autowired
+    private StockMovementService stockMovementService;
+
     @PostMapping
     public ResponseEntity<RawMaterialResponse> create(@RequestBody @Valid CreateRawMaterialRequest requestBody) {
         return ResponseEntity.status(HttpStatus.CREATED).body(rawMaterialService.create(requestBody));
+    }
+
+    @PostMapping("/{id}/movements")
+    public ResponseEntity<StockMovementResponse> create(@PathVariable String id, @RequestBody @Valid CreateStockMovementRequest requestBody) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(stockMovementService.create(UUID.fromString(id), requestBody));
     }
 
     @PatchMapping("/{id}")
