@@ -72,6 +72,25 @@ public class RawMaterial {
         return code.getCode();
     }
 
+    public void deactivate(){
+        //TODO: IMPLEMENTAR REGRA QUANDO TIVER LISTA DE PRODUÇÕES VINCULADAS AO INSUMO
+        //TODO: IMPLEMENTAR REGRA QUANDO TIVER RECEITAS ATIVAS VINCULADAS AO INSUMO
+
+        if(!this.active){
+            throw new InvalidEntityStateException("O insumo já está inativo.");
+        }
+
+        this.active = false;
+    }
+
+    public void activate(){
+        if(this.active){
+            throw new InvalidEntityStateException("O insumo já está ativo.");
+        }
+
+        this.active = true;
+    }
+
     public void update(UpdateRawMaterialRequest rawMaterialRequest){
         if(rawMaterialRequest.isEmpty()){
             throw new InvalidArgumentException(
