@@ -40,6 +40,23 @@ public class ProductService {
     }
 
     @Transactional
+    public ProductResponse updateStatus(UUID id, String action) {
+        Product product = productRepository.findById(id).orElseThrow(
+                () -> new ProductNotFoundException("Produto", "id", String.valueOf(id))
+        );
+
+        switch (action) {
+            case "activate" -> product.activate();
+            case "deactivate" -> product.deactivate();
+            default -> {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        return ProductResponse.fromEntity(product);
+    }
+
+    @Transactional
     public ProductResponse update(UUID id, UpdateProductRequest productRequest){
         Product product = productRepository.findById(id).orElseThrow(
                 () -> new ProductNotFoundException("Produto", "id", String.valueOf(id))
