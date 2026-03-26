@@ -1,10 +1,13 @@
 package dev.anthonyadcs.beverage_production_system.controller;
 
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.CreateRecipeRequest;
 import dev.anthonyadcs.beverage_production_system.dto.request.UpdateProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
+import dev.anthonyadcs.beverage_production_system.dto.response.RecipeResponse;
 import dev.anthonyadcs.beverage_production_system.service.ProductService;
+import dev.anthonyadcs.beverage_production_system.service.RecipeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -24,9 +27,17 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private RecipeService recipeService;
+
     @PostMapping
     public ResponseEntity<ProductResponse> create(@RequestBody @Valid CreateProductRequest requestBody) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(requestBody));
+    }
+
+    @PostMapping("/{id}/recipes")
+    public ResponseEntity<RecipeResponse> createRecipe(@PathVariable String id, @RequestBody @Valid CreateRecipeRequest requestBody) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(recipeService.create(UUID.fromString(id), requestBody));
     }
 
     @PatchMapping("/{id}")
