@@ -2,6 +2,7 @@ package dev.anthonyadcs.beverage_production_system.controller;
 
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateRecipeRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.GetRecipesByProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.request.UpdateProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
@@ -30,14 +31,11 @@ public class ProductController {
     @Autowired
     private RecipeService recipeService;
 
+    /* -------------------- ENDPOINTS DE PRODUTOS --------------------*/
+
     @PostMapping
     public ResponseEntity<ProductResponse> create(@RequestBody @Valid CreateProductRequest requestBody) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(requestBody));
-    }
-
-    @PostMapping("/{id}/recipes")
-    public ResponseEntity<RecipeResponse> createRecipe(@PathVariable String id, @RequestBody @Valid CreateRecipeRequest requestBody) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(recipeService.create(UUID.fromString(id), requestBody));
     }
 
     @PatchMapping("/{id}")
@@ -51,7 +49,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> listById(@PathVariable String id){
+    public ResponseEntity<ProductResponse> listById(@PathVariable String id) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(productService.getById(UUID.fromString(id)));
     }
 
@@ -66,7 +64,7 @@ public class ProductController {
             @PageableDefault(size = 20) Pageable pageable
     ) {
         //Em caso de ordenação não definida, atualiza 'pageable' para um sort por: 'active', 'name' e 'code', respectivamente.
-        if(pageable.getSort().isUnsorted()){
+        if (pageable.getSort().isUnsorted()) {
             pageable = PageRequest.of(
                     pageable.getPageNumber(),
                     pageable.getPageSize(),
@@ -81,4 +79,37 @@ public class ProductController {
         return productService.getAll(active, name, code, pageable);
     }
 
+
+
+    /* -------------------- ENDPOINTS DE RECEITAS --------------------*/
+
+    @PostMapping("/{id}/recipes")
+    public ResponseEntity<RecipeResponse> createRecipe(@PathVariable String id, @RequestBody @Valid CreateRecipeRequest requestBody) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(recipeService.create(UUID.fromString(id), requestBody));
+    }
+
+    @GetMapping("/{id}/recipes")
+    public PageResponse<RecipeResponse> listRecipesByProduct(
+            @PathVariable String id,
+            @RequestParam(required = false, defaultValue = "true", name = "active") List<Boolean> activeValues,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        if (pageable.getSort().isUnsorted()) {
+            pageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(
+                            Sort.Order.desc("active")
+                    )
+            );
+        }
+
+        GetRecipesByProductRequest recipesByProductRequest = new GetRecipesByProductRequest(
+                UUID.fromString(id),
+                activeValues,
+                pageable
+        );
+
+        return recipeService.getByProduct(recipesByProductRequest);
+    }
 }
