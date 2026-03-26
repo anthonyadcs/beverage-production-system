@@ -86,7 +86,7 @@ public class ProductService {
     }
 
     //Utilitário utilizado para evitar repetição de código.
-    private Product findProductByIdOrThrow(UUID id){
+    protected Product findProductByIdOrThrow(UUID id){
         return productRepository.findById(id).orElseThrow(
                 () -> new ProductNotFoundException("Produto", "id", String.valueOf(id))
         );
