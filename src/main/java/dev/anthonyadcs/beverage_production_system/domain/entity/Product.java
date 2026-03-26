@@ -10,17 +10,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "products")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -35,32 +37,29 @@ public class Product {
     @AttributeOverride(name = "code", column = @Column(length = 50, nullable = false, unique = true, updatable = false))
     private EntityCode code;
 
-    @Setter
     @Column(length = 500)
     private String description;
 
-    @Setter
     @Enumerated(EnumType.STRING)
     private ProductUnitOfMeasure unitOfMeasure;
 
     @PositiveOrZero
-    @Setter
     @Column(precision = 10, scale = 3)
     private BigDecimal volumePerUnit;
 
-    @Setter(AccessLevel.NONE)
     @Column(nullable = false)
     private boolean active = true;
 
     @CreationTimestamp
     @Column(nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE", updatable = false)
-    private Instant createdAt = Instant.now();
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant updatedAt;
 
-    protected Product(){}
+    @OneToMany(mappedBy = "product")
+    List<Recipe> recipes = new ArrayList<>();
 
     public Product(EntityCode code, CreateProductRequest productFields){
         this.code = code;
