@@ -43,7 +43,10 @@ public class RawMaterialController {
     }
 
     @PostMapping("/{id}/movements")
-    public ResponseEntity<StockMovementResponse> create(@PathVariable String id, @RequestBody @Valid CreateStockMovementRequest requestBody) {
+    public ResponseEntity<StockMovementResponse> createStockMovement(
+            @PathVariable String id,
+            @RequestBody @Valid CreateStockMovementRequest requestBody
+    ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(stockMovementService.create(UUID.fromString(id), requestBody));
     }
 
@@ -87,7 +90,7 @@ public class RawMaterialController {
     }
 
     @GetMapping("/{id}/movements")
-    public PageResponse<StockMovementResponse> listAllStockMovementById(
+    public PageResponse<StockMovementResponse> listAllStockMovementByRawMaterialId(
             @PathVariable String id,
             @RequestParam(required = false) List<String> type,
             @RequestParam(required = false, defaultValue = "2026-03-25") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
