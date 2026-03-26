@@ -51,6 +51,15 @@ public class Recipe {
 
     public void addRecipeItem(RecipeItem recipeItem){
         this.recipeItems.add(recipeItem);
+        if(!this.active) this.active = true;
+    }
+
+    public void activate(){
+        this.active = true;
+    }
+
+    public void deactivate(){
+        this.active = false;
     }
 
     private void validate(Product product){

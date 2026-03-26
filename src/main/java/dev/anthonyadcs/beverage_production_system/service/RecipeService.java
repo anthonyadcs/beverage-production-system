@@ -38,7 +38,6 @@ public class RecipeService {
         }
 
         Integer newVersion = recipeRepository.findMaxVersionByProduct(product) + 1;
-
         Recipe recipe = new Recipe(recipeRequest.description(), product, newVersion);
 
         Set<UUID> usedRawMaterialId = new HashSet<>();
@@ -62,6 +61,8 @@ public class RecipeService {
             recipe.addRecipeItem(recipeItem);
         }
 
+        recipeRepository.findTopByProductAndActiveTrueOrderByVersionDesc(product).ifPresent(Recipe::deactivate);
+        recipe.activate();
         recipeRepository.save(recipe);
 
         return RecipeResponse.fromEntity(recipe);
