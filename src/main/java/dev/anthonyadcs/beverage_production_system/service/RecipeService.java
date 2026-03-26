@@ -5,13 +5,16 @@ import dev.anthonyadcs.beverage_production_system.domain.entity.RawMaterial;
 import dev.anthonyadcs.beverage_production_system.domain.entity.Recipe;
 import dev.anthonyadcs.beverage_production_system.domain.entity.RecipeItem;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateRecipeRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.GetRecipesByProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.request.RecipeItemRequest;
+import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.RecipeResponse;
 import dev.anthonyadcs.beverage_production_system.exception.InvalidArgumentException;
 import dev.anthonyadcs.beverage_production_system.exception.InvalidEntityStateException;
 import dev.anthonyadcs.beverage_production_system.repository.RecipeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -30,10 +33,10 @@ public class RecipeService {
     private RecipeRepository recipeRepository;
 
     @Transactional
-    public RecipeResponse create(UUID productId, CreateRecipeRequest recipeRequest){
+    public RecipeResponse create(UUID productId, CreateRecipeRequest recipeRequest) {
         Product product = productService.findProductByIdOrThrow(productId);
 
-        if(!product.isActive()){
+        if (!product.isActive()) {
             throw new InvalidEntityStateException("O produto está inativo e não pode ter novas receitas vinculadas a ele.");
         }
 
@@ -41,14 +44,14 @@ public class RecipeService {
         Recipe recipe = new Recipe(recipeRequest.description(), product, newVersion);
 
         Set<UUID> usedRawMaterialId = new HashSet<>();
-        for(RecipeItemRequest recipeItemRequest : recipeRequest.items()){
+        for (RecipeItemRequest recipeItemRequest : recipeRequest.items()) {
             RawMaterial rawMaterial = rawMaterialService.findRawRawMaterialById(recipeItemRequest.rawMaterialId());
 
-            if(!rawMaterial.isActive()){
+            if (!rawMaterial.isActive()) {
                 throw new InvalidEntityStateException("O insumo está inativo e não pode ser utilizado em receitas.");
             }
 
-            if(!usedRawMaterialId.add(rawMaterial.getId())){
+            if (!usedRawMaterialId.add(rawMaterial.getId())) {
                 throw new InvalidArgumentException("Não é permitido repetir insumos na receita.");
             }
 
@@ -66,5 +69,17 @@ public class RecipeService {
         recipeRepository.save(recipe);
 
         return RecipeResponse.fromEntity(recipe);
+    }
+
+    public PageResponse<RecipeResponse> getByProduct(GetRecipesByProductRequest recipesByProductRequest) {
+        Product product = productService.findProductByIdOrThrow(recipesByProductRequest.productId());
+
+        Page<RecipeResponse> recipeResponses = recipeRepository.findByProductIdAndActiveIn(
+                product.getId(),
+                recipesByProductRequest.activeValues(),
+                recipesByProductRequest.pageable()
+        ).map(RecipeResponse::fromEntity);
+
+        return PageResponse.fromPage(recipeResponses);
     }
 }

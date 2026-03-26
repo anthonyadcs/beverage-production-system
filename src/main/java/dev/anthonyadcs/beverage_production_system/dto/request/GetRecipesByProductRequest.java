@@ -1,13 +1,11 @@
 package dev.anthonyadcs.beverage_production_system.dto.request;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import org.springframework.data.domain.Pageable;
 
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.UUID;
 
-public record GetAllRecipesRequest(
+public record GetRecipesByProductRequest(
         UUID productId,
         List<Boolean> activeValues,
         Pageable pageable
