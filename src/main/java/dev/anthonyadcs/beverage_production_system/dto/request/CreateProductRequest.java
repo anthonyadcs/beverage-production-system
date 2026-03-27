@@ -22,5 +22,7 @@ public record CreateProductRequest(
                 inclusive = false,
                 message = "O volume por unidade do produto deve ser maior que 0."
         )
+        @Digits(integer = 10, fraction = 3, message = "O volume por unidade deve ter no máximo 3 casas decimais.")
         BigDecimal volumePerUnit
-) {}
+) {
+}

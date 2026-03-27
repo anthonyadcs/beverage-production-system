@@ -3,6 +3,7 @@ package dev.anthonyadcs.beverage_production_system.service;
 import dev.anthonyadcs.beverage_production_system.domain.entity.Product;
 import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.GetAllProductsRequest;
 import dev.anthonyadcs.beverage_production_system.dto.request.UpdateProductRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
@@ -17,6 +18,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,7 +34,13 @@ public class ProductService {
             code = EntityCode.create("PROD");
         } while(productRepository.existsByCode(code));
 
-        Product product = new Product(code, productRequest);
+        Product product = new Product(
+                code,
+                productRequest.name(),
+                productRequest.description(),
+                productRequest.unitOfMeasure(),
+                productRequest.volumePerUnit()
+        );
 
         return ProductResponse.fromEntity(
                 productRepository.save(product)
@@ -58,7 +66,12 @@ public class ProductService {
     public ProductResponse update(UUID id, UpdateProductRequest productRequest){
         Product product = findProductByIdOrThrow(id);
 
-        product.update(productRequest);
+        product.update(
+                productRequest.name(),
+                productRequest.description(),
+                productRequest.unitOfMeasure(),
+                productRequest.volumePerUnit()
+        );
 
         return ProductResponse.fromEntity(product);
     }
@@ -67,19 +80,20 @@ public class ProductService {
         return ProductResponse.fromEntity(findProductByIdOrThrow(id));
     }
 
-    public PageResponse<ProductResponse> getAll(List<Boolean> activeValues, String name, String code, Pageable pageable){
-        Specification<Product> specification = Specification.where(ProductSpecification.isActiveIn(activeValues) );
+    public PageResponse<ProductResponse> getAll(GetAllProductsRequest productsRequest){
+        Specification<Product> specification = Specification.where(ProductSpecification.isActiveIn(productsRequest.activeValues()));
 
-        if(name != null && !name.isBlank()){
-            specification = specification.and(ProductSpecification.hasNameIgnoreCase(name));
+        if(productsRequest.name() != null && !productsRequest.name().isBlank()){
+            specification = specification.and(ProductSpecification.hasNameIgnoreCase(productsRequest.name()));
         }
 
-        if(code != null && !code.isBlank()){
-            specification = specification.and(ProductSpecification.hasCode(code));
+        if(productsRequest.code() != null && !productsRequest.code().isBlank()){
+            specification = specification.and(ProductSpecification.hasCode(productsRequest.code()));
         }
 
         //Busca por todos os critérios e, com o map, transforma Product em ProductResponse
-        Page<ProductResponse> productResponsePage = productRepository.findAll(specification, pageable).map(ProductResponse::fromEntity);
+        Page<ProductResponse> productResponsePage =
+                productRepository.findAll(specification, productsRequest.pageable()).map(ProductResponse::fromEntity);
 
         //Transforma Page em PageResponse para melhor filtro dos campos retornados na requisição
         return PageResponse.fromPage(productResponsePage);

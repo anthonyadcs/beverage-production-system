@@ -1,9 +1,6 @@
 package dev.anthonyadcs.beverage_production_system.controller;
 
-import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
-import dev.anthonyadcs.beverage_production_system.dto.request.CreateRecipeRequest;
-import dev.anthonyadcs.beverage_production_system.dto.request.GetRecipesByProductRequest;
-import dev.anthonyadcs.beverage_production_system.dto.request.UpdateProductRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.*;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.ProductResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.RecipeResponse;
@@ -40,17 +37,17 @@ public class ProductController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<ProductResponse> update(@PathVariable String id, @RequestBody @Valid UpdateProductRequest requestBody) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(productService.update(UUID.fromString(id), requestBody));
+        return ResponseEntity.status(HttpStatus.OK).body(productService.update(UUID.fromString(id), requestBody));
     }
 
     @PatchMapping("/{id}/{action}")
     public ResponseEntity<ProductResponse> updateStatus(@PathVariable String id, @PathVariable String action) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(productService.updateStatus(UUID.fromString(id), action));
+        return ResponseEntity.status(HttpStatus.OK).body(productService.updateStatus(UUID.fromString(id), action));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> listById(@PathVariable String id) {
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(productService.getById(UUID.fromString(id)));
+        return ResponseEntity.status(HttpStatus.OK).body(productService.getById(UUID.fromString(id)));
     }
 
 
@@ -58,9 +55,7 @@ public class ProductController {
     public PageResponse<ProductResponse> listAll(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String code,
-            @RequestParam(required = false, defaultValue = "true") List<Boolean> active,
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "20") Integer size,
+            @RequestParam(name = "active", required = false, defaultValue = "true") List<Boolean> activeValues,
             @PageableDefault(size = 20) Pageable pageable
     ) {
         //Em caso de ordenação não definida, atualiza 'pageable' para um sort por: 'active', 'name' e 'code', respectivamente.
@@ -76,10 +71,15 @@ public class ProductController {
             );
         }
 
-        return productService.getAll(active, name, code, pageable);
+        GetAllProductsRequest getAllProductsRequest = new GetAllProductsRequest(
+                activeValues,
+                name,
+                code,
+                pageable
+        );
+
+        return productService.getAll(getAllProductsRequest);
     }
-
-
 
     /* -------------------- ENDPOINTS DE RECEITAS --------------------*/
 

@@ -2,17 +2,12 @@ package dev.anthonyadcs.beverage_production_system.domain.entity;
 
 import dev.anthonyadcs.beverage_production_system.domain.enums.ProductUnitOfMeasure;
 import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
-import dev.anthonyadcs.beverage_production_system.dto.request.CreateProductRequest;
-import dev.anthonyadcs.beverage_production_system.dto.request.UpdateProductRequest;
 import dev.anthonyadcs.beverage_production_system.exception.InvalidArgumentException;
 import dev.anthonyadcs.beverage_production_system.exception.InvalidEntityStateException;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
@@ -26,10 +21,9 @@ import java.util.*;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(updatable = false)
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
-    @Setter
     @Column(length = 100, nullable = false)
     private String name;
 
@@ -43,15 +37,13 @@ public class Product {
     @Enumerated(EnumType.STRING)
     private ProductUnitOfMeasure unitOfMeasure;
 
-    @PositiveOrZero
-    @Column(precision = 10, scale = 3)
+    @Column(precision = 10, scale = 3, nullable = false)
     private BigDecimal volumePerUnit;
 
     @Column(nullable = false)
-    private boolean active = true;
+    private boolean active;
 
-    @CreationTimestamp
-    @Column(nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE", updatable = false)
+    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false, updatable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
@@ -61,16 +53,26 @@ public class Product {
     @OneToMany(mappedBy = "product")
     List<Recipe> recipes = new ArrayList<>();
 
-    public Product(EntityCode code, CreateProductRequest productFields){
+    public Product(EntityCode code, String name, String description, ProductUnitOfMeasure unitOfMeasure, BigDecimal volumePerUnit){
+        validate(code, name, unitOfMeasure, volumePerUnit);
+
         this.code = code;
-        this.name = productFields.name();
-        this.description = productFields.description();
-        this.unitOfMeasure = productFields.unitOfMeasure();
-        this.volumePerUnit = productFields.volumePerUnit();
+        this.name = name;
+        this.description = description;
+        this.unitOfMeasure = unitOfMeasure;
+        this.volumePerUnit = volumePerUnit;
     }
 
     public String getCode() {
         return code.getCode();
+    }
+
+    public void activate(){
+        if(this.active){
+            throw new InvalidEntityStateException("O produto já está ativo.");
+        }
+
+        this.active = true;
     }
 
     public void deactivate(){
@@ -83,42 +85,33 @@ public class Product {
         this.active = false;
     }
 
-    public void activate(){
-        if(this.active){
-            throw new InvalidEntityStateException("O produto já está ativo.");
-        }
-
-        this.active = true;
-    }
-
-    public void update(UpdateProductRequest productRequest){
-        if(productRequest.isEmpty()){
-            throw new InvalidArgumentException(
-                    "Ao menos um dos campos devem ser fornecidos para atualização: 'nome', 'descrição', 'unidade de medida', 'volume por unidade'"
-            );
-        }
-
+    public void update(String name, String description, ProductUnitOfMeasure unitOfMeasure, BigDecimal volumePerUnit){
         if(!this.isActive()){
             throw new InvalidEntityStateException("O produto está inativo e não pode ser atualizado.");
         }
 
         //TODO: IMPLEMENTAR REGRA QUANDO TIVER LISTA DE PRODUÇÕES VINCULADAS AO PRODUTO
 
-        if(productRequest.name() != null && !productRequest.name().isBlank()){
-            this.name = productRequest.name();
+        if(name == null && description == null && unitOfMeasure == null && volumePerUnit == null){
+            throw new InvalidArgumentException("Ao menos um campo deve ser fornecido para atualização.");
         }
 
-        if(productRequest.description() != null && !productRequest.description().isBlank()){
-            this.description = productRequest.description();
-        }
+        this.name = Optional.ofNullable(name).filter(n -> !n.isBlank()).orElse(this.name);
+        this.description = Optional.ofNullable(description).filter(d -> !d.isBlank()).orElse(this.description);
+        this.volumePerUnit = Optional.ofNullable(volumePerUnit).orElse(this.volumePerUnit);
+    }
 
-        if(productRequest.unitOfMeasure() != null){
-            this.unitOfMeasure = productRequest.unitOfMeasure();
-        }
+    private void validate(EntityCode code, String name, ProductUnitOfMeasure unitOfMeasure, BigDecimal volumePerUnit){
+        Optional.ofNullable(code).orElseThrow(() -> new InvalidArgumentException("O código é necessário para criar um produto."));
+        Optional.ofNullable(name).orElseThrow(() -> new InvalidArgumentException("O nome é necessário para criar um produto."));
+        Optional.ofNullable(unitOfMeasure).orElseThrow(() -> new InvalidArgumentException("O código é necessário para criar um produto."));
+        Optional.ofNullable(volumePerUnit).orElseThrow(() -> new InvalidArgumentException("O código é necessário para criar um produto."));
+    }
 
-        if(productRequest.volumePerUnit() != null){
-            this.volumePerUnit = productRequest.volumePerUnit();
-        }
+    @PrePersist
+    protected void prePersist(){
+        this.createdAt = Instant.now();
+        this.active = true;
     }
 
 }

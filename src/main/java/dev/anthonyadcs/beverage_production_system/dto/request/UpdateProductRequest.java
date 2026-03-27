@@ -2,6 +2,7 @@ package dev.anthonyadcs.beverage_production_system.dto.request;
 
 import dev.anthonyadcs.beverage_production_system.domain.enums.ProductUnitOfMeasure;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -20,9 +21,7 @@ public record UpdateProductRequest(
                 inclusive = false,
                 message = "O volume por unidade do produto deve ser maior que 0."
         )
+        @Digits(fraction = 3, integer = 10, message = "O volume por unidade do produto deve ser maior que 0.")
         BigDecimal volumePerUnit
 ) {
-    public boolean isEmpty() {
-        return name == null && description == null && volumePerUnit == null && unitOfMeasure == null;
-    }
 }
