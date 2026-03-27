@@ -5,10 +5,7 @@ import dev.anthonyadcs.beverage_production_system.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -21,5 +18,10 @@ public class RecipeController {
     @GetMapping("/{id}")
     public ResponseEntity<RecipeResponse> listById(@PathVariable String id){
         return ResponseEntity.status(HttpStatus.OK).body(recipeService.getById(UUID.fromString(id)));
+    }
+
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<RecipeResponse> activateRecipe(@PathVariable String id){
+        return ResponseEntity.status(HttpStatus.OK).body(recipeService.activateRecipe(UUID.fromString(id)));
     }
 }
