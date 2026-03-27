@@ -11,6 +11,7 @@ import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.RecipeResponse;
 import dev.anthonyadcs.beverage_production_system.exception.InvalidArgumentException;
 import dev.anthonyadcs.beverage_production_system.exception.InvalidEntityStateException;
+import dev.anthonyadcs.beverage_production_system.exception.RecipeNotFoundExcepetion;
 import dev.anthonyadcs.beverage_production_system.repository.RecipeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,15 @@ public class RecipeService {
 
         return RecipeResponse.fromEntity(recipe);
     }
+
+    public RecipeResponse getById(UUID id) {
+        Recipe recipe = recipeRepository.findById(id).orElseThrow(
+                () -> new RecipeNotFoundExcepetion("Receita", "id", String.valueOf(id))
+        );
+
+        return RecipeResponse.fromEntity(recipe);
+    }
+
 
     public PageResponse<RecipeResponse> getByProduct(GetRecipesByProductRequest recipesByProductRequest) {
         Product product = productService.findProductByIdOrThrow(recipesByProductRequest.productId());
