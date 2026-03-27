@@ -13,7 +13,7 @@ public record RecipeItemRequest(
         UUID rawMaterialId,
 
         @NotNull(message = "A quantidade do insumo utilizado para a produção da receita deve ser maior que 0.")
-        @Digits(integer = 10, fraction = 3, message = "A quantidade de insumo utilizado deve ter no máximo 4 casas decimais.")
         @DecimalMin(value = "0.000", inclusive = false, message = "A quantidade do insumo utilizado para a produção da receita deve ser maior que 0.")
+        @Digits(integer = 10, fraction = 3, message = "A quantidade de insumo utilizado deve ter no máximo 4 casas decimais.")
         BigDecimal quantity
 ) {}
