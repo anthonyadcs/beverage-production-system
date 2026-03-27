@@ -4,16 +4,20 @@ import dev.anthonyadcs.beverage_production_system.domain.enums.StockMovementType
 import dev.anthonyadcs.beverage_production_system.exception.InvalidArgumentException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
 @Getter
 @Table(name = "stock_movements")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StockMovement {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -31,27 +35,20 @@ public class StockMovement {
     @Column(nullable = false, updatable = false)
     private StockMovementType type;
 
-    @PositiveOrZero
     @Column(precision = 10, scale = 3, nullable = false, updatable = false)
     private BigDecimal movedQuantity;
 
-    @PositiveOrZero
     @Column(precision = 10, scale = 3, nullable = false, updatable = false)
     private BigDecimal previousStock;
 
-    @PositiveOrZero
     @Column(precision = 10, scale = 3, nullable = false, updatable = false)
     private BigDecimal resultingStock;
 
     @Column(length = 300, nullable = false, updatable = false, columnDefinition = "TEXT")
     private String reason;
 
-    @CreationTimestamp
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant createdAt;
-
-    protected StockMovement() {
-    }
 
     public StockMovement(
             RawMaterial rawMaterial,
@@ -87,28 +84,35 @@ public class StockMovement {
             BigDecimal resultingStock,
             String reason
     ) {
-        if (rawMaterial == null) {
-            throw new InvalidArgumentException("O insumo a ser movimentado é necessário para a criação de uma movimentação de estoque.");
-        }
+        Optional.ofNullable(rawMaterial).orElseThrow(
+                () -> new InvalidArgumentException("O insumo a ser movimentado é necessário para a criação de uma movimentação de estoque.")
+        );
 
-        if (type == null) {
-            throw new InvalidArgumentException("O tipo de movimentação de estoque é necessário para sua criação.");
-        }
+        Optional.ofNullable(type).orElseThrow(
+                () -> new InvalidArgumentException("O tipo de movimentação de estoque é necessário para sua criação.")
+        );
 
-        if (reason == null) {
-            throw new InvalidArgumentException("O motivo da movimentação de estoque é necessário para sua criação.");
-        }
+        Optional.ofNullable(reason).orElseThrow(
+                () -> new InvalidArgumentException("O motivo da movimentação de estoque é necessário para sua criação.")
+        );
 
-        if (movedQuantity == null || movedQuantity.compareTo(BigDecimal.ZERO) == 0) {
-            throw new InvalidArgumentException("A quantidade do insumo movimentada deve ser maior que 0.");
-        }
+        Optional.ofNullable(movedQuantity).orElseThrow(
+                () -> new InvalidArgumentException("A quantidade do insumo movimentada deve ser maior que 0.")
+        );
 
-        if (previousStock == null) {
-            throw new InvalidArgumentException("O estoque anterior do insumo é necessário para a criação de uma movimentação de estoque.");
-        }
+        Optional.ofNullable(previousStock).orElseThrow(
+                () -> new InvalidArgumentException(
+                        "O estoque anterior a movimentação do insumo é necessário para a criação de uma movimentação de estoque."
+                )
+        );
 
-        if (resultingStock == null || resultingStock.compareTo(BigDecimal.ZERO) < 0) {
-            throw new InvalidArgumentException("A quantidade de insumo movimentada é superior a quantidade presente em estoque.");
-        }
+        Optional.ofNullable(resultingStock).orElseThrow(
+                () -> new InvalidArgumentException("A quantidade de insumo movimentada é superior a quantidade presente em estoque.")
+        );
+    }
+
+    @PrePersist
+    private void prePersist(){
+        this.createdAt = Instant.now();
     }
 }
