@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -70,6 +71,22 @@ public class RecipeService {
         recipeRepository.save(recipe);
 
         return RecipeResponse.fromEntity(recipe);
+    }
+
+    @Transactional
+    public RecipeResponse activateRecipe(UUID id){
+        Recipe newActiveRecipe = recipeRepository.findById(id).orElseThrow(
+                () -> new RecipeNotFoundException("Receita", "id", String.valueOf(id))
+        );
+
+        Optional<Recipe> olderRecipe = recipeRepository.findTopByProductAndActiveTrueOrderByVersionDesc(newActiveRecipe.getProduct());
+
+        newActiveRecipe.activate();
+
+        //TODO: VERIFICAR EXISTÊNCIA DE ORDEM DE PRODUÇÃO ATIVA COM A RECEITA
+        olderRecipe.ifPresent(Recipe::deactivate);
+
+        return RecipeResponse.fromEntity(newActiveRecipe);
     }
 
     public RecipeResponse getById(UUID id) {
