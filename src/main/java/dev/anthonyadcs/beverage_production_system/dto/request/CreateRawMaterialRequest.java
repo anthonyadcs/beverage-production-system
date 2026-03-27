@@ -1,10 +1,7 @@
 package dev.anthonyadcs.beverage_production_system.dto.request;
 
 import dev.anthonyadcs.beverage_production_system.domain.enums.RawMaterialUnitOfMeasure;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
@@ -21,6 +18,7 @@ public record CreateRawMaterialRequest(
 
         @NotNull(message = "O estoque mínimo do insumo é necessário para sua criação.")
         @DecimalMin(value = "0.000", inclusive = false, message = "O estoque mínimo do produto deve ser maior que 0.")
+        @Digits(integer = 10, fraction = 3, message = "O estoque mínimo deve ter no máximo 3 casas decimais.")
         BigDecimal minimumStock
 ) {
 }

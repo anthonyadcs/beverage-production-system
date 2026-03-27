@@ -4,6 +4,7 @@ import dev.anthonyadcs.beverage_production_system.domain.entity.RawMaterial;
 import dev.anthonyadcs.beverage_production_system.domain.enums.RawMaterialUnitOfMeasure;
 import dev.anthonyadcs.beverage_production_system.domain.valueObject.EntityCode;
 import dev.anthonyadcs.beverage_production_system.dto.request.CreateRawMaterialRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.GetAllRawMaterialsRequest;
 import dev.anthonyadcs.beverage_production_system.dto.request.UpdateRawMaterialRequest;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.RawMaterialResponse;
@@ -32,18 +33,29 @@ public class RawMaterialService {
             code = EntityCode.create("RAW");
         } while (rawMaterialRepository.existsByCode(code));
 
-        RawMaterial rawMaterial = new RawMaterial(code, rawMaterialRequest);
-
-        return RawMaterialResponse.fromEntity(
-                rawMaterialRepository.save(rawMaterial)
+        RawMaterial rawMaterial = new RawMaterial(
+                code,
+                rawMaterialRequest.name(),
+                rawMaterialRequest.description(),
+                rawMaterialRequest.minimumStock(),
+                rawMaterialRequest.unitOfMeasure()
         );
+
+        rawMaterialRepository.save(rawMaterial);
+
+        return RawMaterialResponse.fromEntity(rawMaterial);
     }
 
     @Transactional
     public RawMaterialResponse update(UUID id, UpdateRawMaterialRequest rawMaterialRequest){
         RawMaterial rawMaterial = findRawRawMaterialById(id);
 
-        rawMaterial.update(rawMaterialRequest);
+        rawMaterial.update(
+                rawMaterialRequest.name(),
+                rawMaterialRequest.description(),
+                rawMaterialRequest.minimumStock(),
+                rawMaterialRequest.unitOfMeasure()
+        );
 
         return RawMaterialResponse.fromEntity(
                 rawMaterial
@@ -74,27 +86,24 @@ public class RawMaterialService {
     }
 
     public PageResponse<RawMaterialResponse> getAll(
-            String name,
-            List<Boolean> activeValues,
-            List<RawMaterialUnitOfMeasure> unitOfMeasures,
-            boolean lowStock,
-            Pageable pageable
+        GetAllRawMaterialsRequest rawMaterialsRequest
     ) {
-        Specification<RawMaterial> specification = Specification.where(RawMaterialSpecification.isActiveIn(activeValues));
+        Specification<RawMaterial> specification = Specification.where(RawMaterialSpecification.isActiveIn(rawMaterialsRequest.activeValues()));
 
-        if (name != null && !name.isBlank()) {
-            specification = specification.and(RawMaterialSpecification.hasNameIgnoreCase(name));
+        if (rawMaterialsRequest.name() != null && !rawMaterialsRequest.name().isBlank()) {
+            specification = specification.and(RawMaterialSpecification.hasNameIgnoreCase(rawMaterialsRequest.name()));
         }
 
-        if (unitOfMeasures != null && !unitOfMeasures.isEmpty()) {
-            specification = specification.and(RawMaterialSpecification.hasUnitOfMeasure(unitOfMeasures));
+        if (rawMaterialsRequest.unitOfMeasures() != null && !rawMaterialsRequest.unitOfMeasures().isEmpty()) {
+            specification = specification.and(RawMaterialSpecification.hasUnitOfMeasure(rawMaterialsRequest.unitOfMeasures()));
         }
 
-        if (lowStock) {
+        if (rawMaterialsRequest.lowStock()) {
             specification = specification.and(RawMaterialSpecification.hasLowStock());
         }
 
-        Page<RawMaterialResponse> rawMaterialPage = rawMaterialRepository.findAll(specification, pageable).map(RawMaterialResponse::fromEntity);
+        Page<RawMaterialResponse> rawMaterialPage =
+                rawMaterialRepository.findAll(specification, rawMaterialsRequest.pageable()).map(RawMaterialResponse::fromEntity);
 
         return PageResponse.fromPage(rawMaterialPage);
     }

@@ -2,10 +2,7 @@ package dev.anthonyadcs.beverage_production_system.controller;
 
 import dev.anthonyadcs.beverage_production_system.domain.enums.RawMaterialUnitOfMeasure;
 import dev.anthonyadcs.beverage_production_system.domain.enums.StockMovementType;
-import dev.anthonyadcs.beverage_production_system.dto.request.CreateRawMaterialRequest;
-import dev.anthonyadcs.beverage_production_system.dto.request.CreateStockMovementRequest;
-import dev.anthonyadcs.beverage_production_system.dto.request.GetAllByRawMaterialIdRequest;
-import dev.anthonyadcs.beverage_production_system.dto.request.UpdateRawMaterialRequest;
+import dev.anthonyadcs.beverage_production_system.dto.request.*;
 import dev.anthonyadcs.beverage_production_system.dto.response.PageResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.RawMaterialResponse;
 import dev.anthonyadcs.beverage_production_system.dto.response.StockMovementResponse;
@@ -68,9 +65,9 @@ public class RawMaterialController {
     @GetMapping
     public PageResponse<RawMaterialResponse> listAll(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) List<String> unitOfMeasure,
+            @RequestParam(name = "unitOfMeasure", required = false) List<String> unitOfMeasures,
             @RequestParam(required = false, defaultValue = "false") Boolean lowStock,
-            @RequestParam(required = false, defaultValue = "true") List<Boolean> active,
+            @RequestParam(name = "active", required = false, defaultValue = "true") List<Boolean> activeValues,
             @PageableDefault(size = 20) Pageable pageable
     ) {
         if (pageable.getSort().isUnsorted()) {
@@ -86,7 +83,15 @@ public class RawMaterialController {
             );
         }
 
-        return rawMaterialService.getAll(name, active, RawMaterialUnitOfMeasure.parseFromStringList(unitOfMeasure), lowStock, pageable);
+        GetAllRawMaterialsRequest rawMaterialRequest = new GetAllRawMaterialsRequest(
+                name,
+                activeValues,
+                RawMaterialUnitOfMeasure.parseFromStringList(unitOfMeasures),
+                lowStock,
+                pageable
+        );
+
+        return rawMaterialService.getAll(rawMaterialRequest);
     }
 
     @GetMapping("/{id}/movements")

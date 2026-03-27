@@ -1,8 +1,7 @@
 package dev.anthonyadcs.beverage_production_system.dto.request;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
+import dev.anthonyadcs.beverage_production_system.domain.enums.RawMaterialUnitOfMeasure;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
@@ -13,9 +12,11 @@ public record UpdateRawMaterialRequest(
         @Size(max = 500, message = "O números de caracteres máximo aceito para a descrição do insumo é 500.")
         String description,
 
-        @PositiveOrZero
         @DecimalMin(value = "0.000", inclusive = false)
-        BigDecimal minimumStock
+        @Digits(integer = 10, fraction = 3, message = "O estoque mínimo deve ter no máximo 3 casas decimais.")
+        BigDecimal minimumStock,
+
+        RawMaterialUnitOfMeasure unitOfMeasure
 ) {
     public boolean isEmpty() {
         return name == null && description == null && minimumStock == null;
