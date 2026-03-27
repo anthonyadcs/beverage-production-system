@@ -2,14 +2,13 @@ package dev.anthonyadcs.beverage_production_system.domain.entity;
 
 import dev.anthonyadcs.beverage_production_system.exception.InvalidArgumentException;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
@@ -32,11 +31,9 @@ public class RecipeItem {
     @JoinColumn(name = "recipe_id", updatable = false, nullable = false)
     private Recipe recipe;
 
-    @Positive
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, precision = 10, scale = 3)
     private BigDecimal quantity;
 
-    @CreationTimestamp
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -53,21 +50,17 @@ public class RecipeItem {
     }
 
     private void validate(Recipe recipe, RawMaterial rawMaterial,  BigDecimal quantity) {
-        if (recipe == null) {
-            throw new InvalidArgumentException("O código de identificação da receita é necessário para adicionar itens à mesma.");
-        }
+        Optional.ofNullable(recipe).orElseThrow(
+                () -> new InvalidArgumentException("É necessário informar uma receita válida ao adicionar itens.")
+        );
 
-        if (rawMaterial == null) {
-            throw new InvalidArgumentException("O código de identificação do insumo é necessário para adicioná-lo como um item de uma receita.");
-        }
+        Optional.ofNullable(rawMaterial).orElseThrow(
+                () -> new InvalidArgumentException("É necessário informar um insumo válido ao adicionar itens.")
+        );
 
-        if (quantity == null) {
-            throw new InvalidArgumentException("A quantidade do insumo é necessário para a criação da receita.");
-        }
-
-        if(quantity.compareTo(BigDecimal.ZERO) <= 0){
-            throw new InvalidArgumentException("A quantidade do insumo utilizado para a produção da receita deve ser maior que 0.");
-        }
+        Optional.ofNullable(quantity).orElseThrow(
+                () -> new InvalidArgumentException("Não é possível adicionar um item à receita sem informar a quantidade do insumo.")
+        );
     }
 
     @PrePersist

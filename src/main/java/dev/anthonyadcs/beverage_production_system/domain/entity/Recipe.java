@@ -1,6 +1,7 @@
 package dev.anthonyadcs.beverage_production_system.domain.entity;
 
 import dev.anthonyadcs.beverage_production_system.exception.InvalidArgumentException;
+import dev.anthonyadcs.beverage_production_system.exception.InvalidEntityStateException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
@@ -25,7 +26,6 @@ public class Recipe {
     @JoinColumn(name = "product_id", nullable = false, updatable = false)
     private Product product;
 
-    @Positive
     @Column(nullable = false, updatable = false)
     private Integer version;
 
@@ -33,7 +33,7 @@ public class Recipe {
     private String description;
 
     @Column(nullable = false)
-    private boolean active = false;
+    private boolean active;
 
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false, updatable = false)
     private Instant createdAt;
@@ -51,10 +51,13 @@ public class Recipe {
 
     public void addRecipeItem(RecipeItem recipeItem){
         this.recipeItems.add(recipeItem);
-        if(!this.active) this.active = true;
     }
 
     public void activate(){
+        if(this.recipeItems.isEmpty()){
+            throw new InvalidEntityStateException("Não é possível ativar uma receita sem itens.");
+        }
+
         this.active = true;
     }
 
@@ -71,5 +74,6 @@ public class Recipe {
     @PrePersist
     protected void prePersist(){
         this.createdAt = Instant.now();
+        this.active = true;
     }
 }

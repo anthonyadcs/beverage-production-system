@@ -8,24 +8,12 @@ import java.util.List;
 import java.util.UUID;
 
 public record RecipeResponse(
-        @NotNull
         UUID id,
-
-        @NotNull
         UUID productId,
-
-        @NotNull
         Integer version,
-
         String description,
-
-        @NotNull
         Boolean active,
-
-        @NotNull
         List<RecipeItemResponse> items,
-
-        @NotNull
         Instant createdAt
 ) {
         public static RecipeResponse fromEntity(Recipe recipe){
